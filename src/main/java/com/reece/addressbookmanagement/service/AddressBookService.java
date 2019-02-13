@@ -28,6 +28,7 @@ public class AddressBookService implements IAddressBookService {
         AddressBook addressBook = addressBookRepository.findById(addressBookID).orElseThrow(()->new IllegalArgumentException("id not found"));
         contact.setAddressbook(addressBook);
         System.out.println("trying to save contact: " + contact);
+        //Contact anotherContact = new Contact("a", "b", "12312312");
         Contact savedContact = contactRepository.save(contact);
         return savedContact;
     }
