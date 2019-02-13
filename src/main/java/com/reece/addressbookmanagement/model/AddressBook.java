@@ -1,11 +1,31 @@
 package com.reece.addressbookmanagement.model;
 
-import java.util.List;
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PropertyComparator;
 
-public interface AddressBook {
-    List<Contact> contacts();
+import javax.persistence.*;
+import java.util.*;
 
-    boolean addToContacts();
+@Entity
+public class AddressBook implements IAddressBook {
+    @Id
+    @GeneratedValue
+    private Long id;
 
-    boolean deleteFromContacts();
+    @OneToMany(mappedBy = "addressbook", fetch = FetchType.EAGER)
+    private Collection<Contact> contacts;
+
+    @Override
+    public Collection<Contact> getContacts() { return contacts; }
+
+    @Override
+    public boolean addToContacts(Contact contact) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteFromContacts() { return false; }
+
+
+
 }
