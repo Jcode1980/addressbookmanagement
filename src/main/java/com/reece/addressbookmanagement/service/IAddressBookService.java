@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface IAddressBookService {
     Contact addContactToAddressBook(Long addressBookID, Contact contact);
-    void deleteContact(Long contactID);
+    void deleteContactFromAddressBook(Long addressBookID, Long contactID);
     Collection<Contact> retrieveAllContactsFromAddressBook(Long addressBookID);
-    Collection<IContact> retrieveUniqieContactsFromAddressBooks(List<AddressBook> addressBooks);
+    Collection<Contact> retrieveUniqieContactsFromAddressBooks(Collection<Long> addressBookIDs);
     Contact getContact(Long contactID);
 }
