@@ -1,11 +1,15 @@
 package com.reece.addressbookmanagement.model;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface IAddressBook {
     Collection<Contact> getContacts();
 
-    boolean addToContacts(Contact contact);
+    void setContacts(List<Contact> contacts);
 
-    boolean deleteFromContacts();
+    String getName();
+
+    void setName(String name);
+
 }

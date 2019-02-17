@@ -11,7 +11,6 @@ import java.util.List;
 public interface IAddressBookService {
     Contact addContactToAddressBook(Long addressBookID, Contact contact);
     void deleteContactFromAddressBook(Long addressBookID, Long contactID);
-    Collection<Contact> retrieveAllContactsFromAddressBook(Long addressBookID);
+    List<Contact> retrieveAllContactsFromAddressBook(Long addressBookID);
     Collection<Contact> retrieveUniqieContactsFromAddressBooks(Collection<Long> addressBookIDs);
-    Contact getContact(Long contactID);
 }

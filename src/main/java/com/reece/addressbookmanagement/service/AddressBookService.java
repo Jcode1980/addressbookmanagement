@@ -10,8 +10,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AddressBookService implements IAddressBookService {
@@ -37,38 +36,36 @@ public class AddressBookService implements IAddressBookService {
 
     @Override
     public void deleteContactFromAddressBook(Long addressBookID, Long contactID) {
-        AddressBook addressBook = addressBookRepository.findById(addressBookID).orElseThrow(()->new IllegalArgumentException("id not found"));
+        AddressBook addressBook = addressBookRepository.findById(addressBookID).
+                orElseThrow(()->new IllegalArgumentException("Address with id " +addressBookID+" not found."));
 
         Contact foundContact = addressBook.getContacts().stream().filter(contact -> contact.getId()
-                .equals(contactID)).findFirst().orElseThrow(()->new IllegalArgumentException("id not found"));
+                .equals(contactID)).findFirst().orElseThrow(() ->
+                new IllegalArgumentException("Contact with id " +contactID+" not found in address book."));
 
         contactRepository.delete(foundContact);
     }
 
-
     @Override
-    public Collection<Contact> retrieveAllContactsFromAddressBook(Long addressBookID){
+    public List<Contact> retrieveAllContactsFromAddressBook(Long addressBookID){
         log.info("got to retrieveAllContactsFromAddressBook ");
-        AddressBook addressBook = addressBookRepository.findById(addressBookID).orElseThrow(()->new IllegalArgumentException("id not found"));
+        AddressBook addressBook = addressBookRepository.findById(addressBookID).
+                orElseThrow(()->new IllegalArgumentException("Address with id " +addressBookID+" not found."));
         return addressBook.getContacts();
     }
 
     @Override
-    public Collection<Contact> retrieveUniqieContactsFromAddressBooks(Collection<Long> addressBookIDs) {
+    public Set<Contact> retrieveUniqieContactsFromAddressBooks(Collection<Long> addressBookIDs) {
         log.info("got to retrieveUniqieContactsFromAddressBooks ");
         List<AddressBook> addressBooks = addressBookRepository.findAllById(addressBookIDs);
 
         return allUniqueContactsForAddressBooks(addressBooks);
     }
 
-    @Override
-    public Contact getContact(Long contactID){
-        return contactRepository.findById(contactID).orElseThrow(()->new IllegalArgumentException());
-    }
 
-    //FIXME
-    private List<Contact> allUniqueContactsForAddressBooks(List<AddressBook> addressBooks){
-        //implement me
-        return null;
+    private Set<Contact> allUniqueContactsForAddressBooks(List<AddressBook> addressBooks){
+        HashSet<Contact> uniqueContacts = new HashSet<>();
+        addressBooks.stream().forEach(addressBook -> uniqueContacts.addAll(addressBook.getContacts()));
+        return uniqueContacts;
     }
 }

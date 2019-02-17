@@ -11,21 +11,33 @@ public class AddressBook implements IAddressBook {
     @Id
     @GeneratedValue
     private Long id;
+    private String name;
 
     @OneToMany(mappedBy = "addressbook", fetch = FetchType.EAGER)
-    private Collection<Contact> contacts;
+    private List<Contact> contacts;
+
+    public AddressBook(){}
+
+    public AddressBook(String name){this.name = name;}
 
     @Override
-    public Collection<Contact> getContacts() { return contacts; }
+    public String getName() { return name; }
 
     @Override
-    public boolean addToContacts(Contact contact) {
-        return false;
+    public void setName(String name) { this.name = name; }
+
+    @Override
+    public List<Contact> getContacts() {
+        if(contacts == null){
+            contacts = new ArrayList<>();
+        }
+        return contacts;
     }
 
     @Override
-    public boolean deleteFromContacts() { return false; }
-
+    public void setContacts(List<Contact> contacts) {
+        this.contacts = contacts;
+    }
 
 
 }
