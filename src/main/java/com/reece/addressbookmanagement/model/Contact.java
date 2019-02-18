@@ -87,7 +87,6 @@ public class Contact implements IContact{
         }
 
         return returnEqualsValue;
-
     }
 
     @Override

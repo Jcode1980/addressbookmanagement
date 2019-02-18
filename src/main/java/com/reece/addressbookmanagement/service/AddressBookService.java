@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AddressBookService implements IAddressBookService {
@@ -55,7 +56,7 @@ public class AddressBookService implements IAddressBookService {
     }
 
     @Override
-    public Set<Contact> retrieveUniqieContactsFromAddressBooks(Collection<Long> addressBookIDs) {
+    public List<Contact> retrieveUniqieContactsFromAddressBooks(Collection<Long> addressBookIDs) {
         log.info("got to retrieveUniqieContactsFromAddressBooks ");
         List<AddressBook> addressBooks = addressBookRepository.findAllById(addressBookIDs);
 
@@ -63,9 +64,13 @@ public class AddressBookService implements IAddressBookService {
     }
 
 
-    private Set<Contact> allUniqueContactsForAddressBooks(List<AddressBook> addressBooks){
+    private List<Contact> allUniqueContactsForAddressBooks(List<AddressBook> addressBooks){
         HashSet<Contact> uniqueContacts = new HashSet<>();
         addressBooks.stream().forEach(addressBook -> uniqueContacts.addAll(addressBook.getContacts()));
-        return uniqueContacts;
+        //ArrayList<Contact> contacts = new ArrayList<>(uniqueContacts);
+        Comparator<Contact> nameComparator = (h1, h2) -> h1.getId().compareTo(h2.getId());
+        List<Contact> sortedContacts = uniqueContacts.stream().sorted(nameComparator).collect(Collectors.toList());
+
+        return  sortedContacts;
     }
 }

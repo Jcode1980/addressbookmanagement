@@ -93,7 +93,7 @@ public class AddressBookServiceTest {
 
     @Test
     public void retrieveUniqieContactsFromAddressBooks() {
-        Set<Contact> contactsList = addressBookService.retrieveUniqieContactsFromAddressBooks(
+        List<Contact> contactsList = addressBookService.retrieveUniqieContactsFromAddressBooks(
                 Arrays.asList(TEST_ADDRESS_BOOK_ID, TEST_ADDRESS_BOOK2_ID));
         assertThat(contactsList.size(), is(2));
     }

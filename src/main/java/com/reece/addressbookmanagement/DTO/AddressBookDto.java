@@ -6,8 +6,6 @@ import java.util.Collection;
 
 public class AddressBookDto {
 
-    private Long id;
-
     private Collection<Contact> contacts;
 
     public Collection<Contact> getContacts() { return contacts; }

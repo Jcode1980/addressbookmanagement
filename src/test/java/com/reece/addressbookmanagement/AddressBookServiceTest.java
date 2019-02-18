@@ -1,4 +1,4 @@
-package com.reece.adddressbookmanagement;
+package com.reece.addressbookmanagement;
 
 import com.reece.addressbookmanagement.repository.AddressBookRepository;
 import com.reece.addressbookmanagement.repository.ContactRepository;
