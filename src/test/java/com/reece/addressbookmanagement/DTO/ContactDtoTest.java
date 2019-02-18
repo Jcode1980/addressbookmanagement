@@ -4,52 +4,51 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 public class ContactDtoTest {
+    static private final String GIVEN = "Micheal";
+    static private final String SURNAME = "Jordan";
+    static private final String PHONE_NUMBER = "322464423431";
+    static private final Long ID = 1l;
 
 
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
 
     @Test
     public void getGiven() {
+        ContactDto contactDto = new ContactDto();
+        contactDto.setGiven(GIVEN);
+
+        assertThat(contactDto.getGiven(), is(GIVEN));
     }
 
-    @Test
-    public void setGiven() {
-    }
 
     @Test
     public void getSurname() {
-    }
+        ContactDto contactDto = new ContactDto();
+        contactDto.setSurname(SURNAME);
 
-    @Test
-    public void setSurname() {
+        assertThat(contactDto.getSurname(), is(SURNAME));
     }
 
     @Test
     public void getPhoneNumber() {
+        ContactDto contactDto = new ContactDto();
+        contactDto.setPhoneNumber(PHONE_NUMBER);
+
+        assertThat(contactDto.getPhoneNumber(), is(PHONE_NUMBER));
     }
 
-    @Test
-    public void setPhoneNumber() {
-    }
 
     @Test
     public void getId() {
+        ContactDto contactDto = new ContactDto();
+        contactDto.setId(ID);
+
+        assertThat(contactDto.getId(), is(ID));
     }
 
-    @Test
-    public void setId() {
-    }
 
-    @Test
-    public void toString() {
-    }
+
 }
