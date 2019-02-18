@@ -1,8 +1,7 @@
 package com.reece.addressbookmanagement.controller;
 
 import com.reece.addressbookmanagement.Application;
-import com.reece.addressbookmanagement.DTO.ContactDto;
-import com.reece.addressbookmanagement.model.Contact;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -11,16 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,23 +29,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(
         locations = "classpath:application-integrationtest.properties")
 public class AddressBookControllerIntegrationTest {
+    private Logger log = Logger.getLogger(AddressBookControllerIntegrationTest.class);
     static private final String ADDRESS_BOOK_API_URL ="http://localhost:8080/api/addressbook/";
+    static private final String CONTACTS_URL = ADDRESS_BOOK_API_URL + "1/contacts";
 
     @Autowired
     private MockMvc mvc;
 
     @Test
     public void getContactsFromAddressBook_shouldReturnCorrectContacts() throws Exception {
-        String contactsURL = ADDRESS_BOOK_API_URL + "contacts/1";
 
-        System.out.println("contacts URL is: " + contactsURL);
-
-        mvc.perform(get(contactsURL)
+        mvc.perform(get(CONTACTS_URL)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(result -> {
-                    System.out.println("getContactsFromAddressBook Response: " + result.getResponse().getContentAsString());
-                })
+                .andDo(result -> log.info("getContactsFromAddressBook Response: " + result.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].given", is("Kevin")))
                 .andExpect(jsonPath("$[0].surname", is("Durant")))
@@ -63,13 +56,23 @@ public class AddressBookControllerIntegrationTest {
     }
 
     @Test
+    public void getContactsFromAddressBook_shouldThrowExceptionWhenAddressNotFound() throws Exception {
+        String badContactsURL = ADDRESS_BOOK_API_URL + "123123123123/contacts";
+
+        mvc.perform(get(badContactsURL)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
     public void getUniqueContactsFromAddressBooks_shouldOnlyReturnUniqueContacts() throws Exception{
         String uniqueContactsURL = ADDRESS_BOOK_API_URL+"contacts?addressBookIDs=1,2";
 
         mvc.perform(get(uniqueContactsURL)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(result -> {System.out.println("getUniqueContactsFromAddressBooks Response: " + result.getResponse().getContentAsString());})
+                .andDo(result -> log.info("getUniqueContactsFromAddressBooks Response: " + result.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$", hasSize(5)))
                 .andExpect(jsonPath("$[0].given", is("Kevin")))
                 .andExpect(jsonPath("$[0].surname", is("Durant")))
@@ -94,21 +97,18 @@ public class AddressBookControllerIntegrationTest {
 
     @Test
     public void addContactToAddressBook_shouldAddToCorrectAddressBook() throws Exception{
-        String contactsURL = ADDRESS_BOOK_API_URL + "contacts/1";
         String addContactToAddressBook = ADDRESS_BOOK_API_URL+"1/addContact";
 
         mvc.perform(post(addContactToAddressBook)
                 .content(contactJsonObject("Paul", "Pierce", "123453432").toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andDo(result -> {System.out.println("Response: " + result.getResponse().getContentAsString());});
+                .andDo(result -> log.info("Response: " + result.getResponse().getContentAsString()));
 
-        mvc.perform(get(contactsURL)
+        mvc.perform(get(CONTACTS_URL)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(result -> {
-                    System.out.println("Response: " + result.getResponse().getContentAsString());
-                })
+                .andDo(result -> log.info("Response: " + result.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$", hasSize(4)))
                 .andExpect(jsonPath("$[0].given", is("Paul")))
                 .andExpect(jsonPath("$[0].surname", is("Pierce")))
@@ -129,27 +129,55 @@ public class AddressBookControllerIntegrationTest {
         String addContactToAddressBook = ADDRESS_BOOK_API_URL + "10/addContact";
 
         mvc.perform(post(addContactToAddressBook)
-                .content(contactJsonObject("Paul", "Pierce", "123453432").toString())
+                .content(contactJsonObject("Ben", "Simmons", "0531123421").toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
     }
 
     @Test
+    public void addContactToAddressBook_shouldThrowExceptionWhenNoGiveNameInContact() throws Exception {
+        String addContactToAddressBook = ADDRESS_BOOK_API_URL + "1/addContact";
+
+        mvc.perform(post(addContactToAddressBook)
+                .content(contactJsonObject(null, "Simmons", "0531123421").toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void addContactToAddressBook_shouldThrowExceptionWhenNoSurnameInContact() throws Exception {
+        String addContactToAddressBook = ADDRESS_BOOK_API_URL + "1/addContact";
+
+        mvc.perform(post(addContactToAddressBook)
+                .content(contactJsonObject("Ben", null, "0531123421").toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void addContactToAddressBook_shouldThrowExceptionWhenNoPhoneNumberInContact() throws Exception {
+        String addContactToAddressBook = ADDRESS_BOOK_API_URL + "1/addContact";
+
+        mvc.perform(post(addContactToAddressBook)
+                .content(contactJsonObject("Ben", "Simmons", null).toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
     public void deleteContact() throws Exception {
         String deleteContactFromAddressBookURL = ADDRESS_BOOK_API_URL+"1/removeContact/100001";
-        String contactsURL = ADDRESS_BOOK_API_URL + "contacts/1";
-
 
         mvc.perform(delete(deleteContactFromAddressBookURL).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        mvc.perform(get(contactsURL)
+        mvc.perform(get(CONTACTS_URL)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andDo(result -> {
-                    System.out.println("Response: " + result.getResponse().getContentAsString());
-                })
+                .andDo(result -> log.info("Response: " + result.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].given", is("Steve")))
                 .andExpect(jsonPath("$[0].surname", is("Nash")))
@@ -173,7 +201,7 @@ public class AddressBookControllerIntegrationTest {
         String deleteContactFromAddressBookURL = ADDRESS_BOOK_API_URL+"3/removeContact/100001";
 
         mvc.perform(delete(deleteContactFromAddressBookURL).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
 
     }
 

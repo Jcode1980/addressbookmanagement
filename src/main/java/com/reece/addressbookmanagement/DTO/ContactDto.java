@@ -7,6 +7,7 @@ public class ContactDto {
     private String surname;
     private String phoneNumber;
 
+    @SuppressWarnings("WeakerAccess")
     public ContactDto() {
         super();
     }

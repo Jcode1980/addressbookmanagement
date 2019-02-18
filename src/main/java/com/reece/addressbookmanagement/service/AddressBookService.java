@@ -2,8 +2,6 @@ package com.reece.addressbookmanagement.service;
 
 import com.reece.addressbookmanagement.model.AddressBook;
 import com.reece.addressbookmanagement.model.Contact;
-import com.reece.addressbookmanagement.model.IAddressBook;
-import com.reece.addressbookmanagement.model.IContact;
 import com.reece.addressbookmanagement.repository.AddressBookRepository;
 import com.reece.addressbookmanagement.repository.ContactRepository;
 import org.apache.log4j.Logger;
@@ -20,6 +18,7 @@ public class AddressBookService implements IAddressBookService {
     private ContactRepository contactRepository;
 
     @Autowired
+    @SuppressWarnings("WeakerAccess")
     public AddressBookService(AddressBookRepository addressBookRepository, ContactRepository contactRepository){
         this.addressBookRepository = addressBookRepository;
         this.contactRepository = contactRepository;
@@ -27,12 +26,14 @@ public class AddressBookService implements IAddressBookService {
 
     @Override
     public Contact addContactToAddressBook(Long addressBookID, Contact contact) {
+        if(contact.getGiven()== null){throw new NullPointerException("Given must not be null");}
+        if(contact.getSurname()== null){throw new NullPointerException("Surname must not be null");}
+        if(contact.getPhoneNumber()== null){throw new NullPointerException("Phone Number must not be null");}
+
         AddressBook addressBook = addressBookRepository.findById(addressBookID).orElseThrow(()->new IllegalArgumentException("id not found"));
         contact.setAddressbook(addressBook);
-        System.out.println("trying to save contact: " + contact);
-        //Contact anotherContact = new Contact("a", "b", "12312312");
-        Contact savedContact = contactRepository.save(contact);
-        return savedContact;
+        log.info("trying to save contact: " + contact);
+        return contactRepository.save(contact);
     }
 
     @Override
@@ -66,11 +67,7 @@ public class AddressBookService implements IAddressBookService {
 
     private List<Contact> allUniqueContactsForAddressBooks(List<AddressBook> addressBooks){
         HashSet<Contact> uniqueContacts = new HashSet<>();
-        addressBooks.stream().forEach(addressBook -> uniqueContacts.addAll(addressBook.getContacts()));
-        //ArrayList<Contact> contacts = new ArrayList<>(uniqueContacts);
-        Comparator<Contact> nameComparator = (h1, h2) -> h1.getId().compareTo(h2.getId());
-        List<Contact> sortedContacts = uniqueContacts.stream().sorted(nameComparator).collect(Collectors.toList());
-
-        return  sortedContacts;
+        addressBooks.forEach(addressBook -> uniqueContacts.addAll(addressBook.getContacts()));
+        return uniqueContacts.stream().sorted(Comparator.comparing(Contact::getId)).collect(Collectors.toList());
     }
 }

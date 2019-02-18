@@ -1,7 +1,6 @@
 package com.reece.addressbookmanagement.DTO;
 
 import com.reece.addressbookmanagement.model.Contact;
-
 import java.util.Collection;
 
 public class AddressBookDto {

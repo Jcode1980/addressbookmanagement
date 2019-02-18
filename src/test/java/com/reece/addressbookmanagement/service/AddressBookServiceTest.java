@@ -22,57 +22,55 @@ import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AddressBookServiceTest {
-    static private final Long TEST_ADDRESS_BOOK_ID = 1l;
-    static private final Long TEST_ADDRESS_BOOK2_ID = 2l;
-    static private final Long SAVED_CONTACT_MOCK_ID = 1000l;
+    static private final Long TEST_ADDRESS_BOOK_ID = 1L;
+    static private final Long TEST_ADDRESS_BOOK2_ID = 2L;
+    static private final Long SAVED_CONTACT_MOCK_ID = 1000L;
 
 
-    AddressBookService addressBookService;
+    private AddressBookService addressBookService;
     @Mock
-    AddressBookRepository addressBookRepositoryMock;
+    private AddressBookRepository addressBookRepositoryMock;
     @Mock
-    ContactRepository contactRepositoryMock;
+    private ContactRepository contactRepositoryMock;
     @Mock
-    AddressBook addressBookMock;
+    private AddressBook addressBookMock;
     @Mock
-    AddressBook addressBook2Mock;
+    private AddressBook addressBook2Mock;
     @Mock
-    Contact newContactMock;
+    private Contact newContactMock;
     @Mock
-    Contact savedContactMock;
+    private Contact savedContactMock;
     @Mock
-    Contact savedContact2Mock;
+    private Contact savedContact2Mock;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp(){
 
         when(addressBookRepositoryMock.findById(TEST_ADDRESS_BOOK_ID)).thenReturn(Optional.of(addressBookMock));
         when(addressBookRepositoryMock.findAllById(Arrays.asList(TEST_ADDRESS_BOOK_ID, TEST_ADDRESS_BOOK2_ID))).
                 thenReturn(Arrays.asList(addressBookMock, addressBook2Mock));
 
         when(contactRepositoryMock.save(newContactMock)).thenReturn(savedContactMock);
-        //when(contactRepositoryMock.findById(SAVED_CONTACT_MOCK_ID)).thenReturn(Optional.of(savedContactMock));
 
         when(savedContactMock.getId()).thenReturn(SAVED_CONTACT_MOCK_ID);
 
         when(addressBookMock.getContacts()).thenReturn(new ArrayList<>(Collections.singletonList(savedContactMock)));
         when(addressBook2Mock.getContacts()).thenReturn(new ArrayList<>(Collections.singletonList(savedContact2Mock)));
 
-        //when(savedContactMock.getGiven()).thenReturn("Contact 1");
-        //when(savedContact2Mock.getGiven()).thenReturn("Contact 1");
-
         addressBookService = new AddressBookService(addressBookRepositoryMock, contactRepositoryMock);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         addressBookService = null;
     }
 
 
     @Test
     public void addContactToAddressBook() {
-        System.out.println("is this a mock??" + contactRepositoryMock);
+        when(newContactMock.getGiven()).thenReturn("John");
+        when(newContactMock.getSurname()).thenReturn("Doe");
+        when(newContactMock.getPhoneNumber()).thenReturn("3019831212");
         addressBookService.addContactToAddressBook(TEST_ADDRESS_BOOK_ID, newContactMock);
         verify(contactRepositoryMock, times(1)).save(newContactMock);
     }

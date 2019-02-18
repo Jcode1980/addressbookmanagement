@@ -5,7 +5,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name="contact")
-public class Contact implements IContact{
+public class Contact {
     @Id
     @GeneratedValue
     private Long id;

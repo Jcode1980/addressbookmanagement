@@ -1,7 +1,5 @@
 package com.reece.addressbookmanagement.DTO;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -11,18 +9,14 @@ public class ContactDtoTest {
     static private final String GIVEN = "Micheal";
     static private final String SURNAME = "Jordan";
     static private final String PHONE_NUMBER = "322464423431";
-    static private final Long ID = 1l;
-
-
+    static private final Long ID = 1L;
 
     @Test
     public void getGiven() {
         ContactDto contactDto = new ContactDto();
         contactDto.setGiven(GIVEN);
-
         assertThat(contactDto.getGiven(), is(GIVEN));
     }
-
 
     @Test
     public void getSurname() {

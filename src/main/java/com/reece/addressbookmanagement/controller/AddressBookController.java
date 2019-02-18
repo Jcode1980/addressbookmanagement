@@ -5,23 +5,16 @@ import com.reece.addressbookmanagement.model.Contact;
 import com.reece.addressbookmanagement.service.IAddressBookService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.apache.catalina.connector.Response;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.stream;
 
 @RestController
 @RequestMapping("/api/addressbook/")
@@ -40,27 +33,32 @@ public class AddressBookController {
     /**
      * Returns all the contacts from the address book specified.
      *
-     * @param addressBookID - the contact id to be looked up in the phone book.
+     * @param addressBookID - the contact id to be looked up in the address book.
      * @return the contact that matches request's id, if such contact exists.
-     * @throws IllegalArgumentException if no address is found with this id.
+     * @throws ResponseStatusException Bad request status if no address is found with this id.
      */
     @ApiOperation("Get a contacts for address book.")
-    @GetMapping(value = "contacts/{addressBookID}", produces="application/json")
+    @GetMapping(value = "{addressBookID}/contacts", produces="application/json")
     @ResponseStatus(HttpStatus.OK)
+    @SuppressWarnings("unused")
     public Collection<ContactDto> getContactsFromAddressBook(
             @ApiParam(value="The id of the address book which holds all the contacts")
             @PathVariable("addressBookID")String addressBookID) throws IllegalArgumentException  {
-        Collection<Contact> contactsFound = addressBookService.retrieveAllContactsFromAddressBook(Long.valueOf(addressBookID));
-        System.out.println("found contacts");
-        System.out.println(contactsFound);
+        Collection<Contact> contactsFound;
+        try{
+            contactsFound = addressBookService.retrieveAllContactsFromAddressBook(Long.valueOf(addressBookID));
+        }catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+
         Collection<ContactDto> contactDtos = contactsFound.stream().map(contact-> modelMapper.
                 map(contact, ContactDto.class)).collect(Collectors.toList());
-        System.out.println("Dto found contacts");
-        System.out.println(contactDtos);
+        log.debug("Dto found contacts");
+        log.debug(contactDtos);
         //return contactsFound;
 //        Collection<ContactDto> contactDtos = addressBookService.retrieveAllContactsFromAddressBook(Long.valueOf(addressBookID)).stream().
 //                map(contact-> modelMapper.map(contact, ContactDto.class)).collect(Collectors.toList());
-        //System.out.println(contactDtos);
+        //log.info(contactDtos);
         return contactDtos;
     }
 
@@ -74,18 +72,20 @@ public class AddressBookController {
     @ApiOperation("Get all unique contacts from a list of address books.")
     @GetMapping(value = "contacts", produces="application/json")
     @ResponseStatus(HttpStatus.OK)
+    @SuppressWarnings("unused")
     public Collection<ContactDto> getUniqueContactsFromAddressBooks(
-            @ApiParam(value="A coma seperated String which contains address book IDs")
+            @ApiParam(value="A coma seperated String which contains address book IDs. e.g '1,2'")
             @RequestParam("addressBookIDs") String addressBookIDsString) {
 
         String[] addressBookStrings = addressBookIDsString.split(" *, *");
-        Collection<Long> addressBookIDs = Arrays.stream(addressBookStrings).map(s -> Long.valueOf(s)).collect(Collectors.toList());
-        log.info("these are the address book splits: " + addressBookIDs);
+        Collection<Long> addressBookIDs = Arrays.stream(addressBookStrings).map(Long::valueOf).collect(Collectors.toList());
+        log.debug("these are the address book splits: " + addressBookIDs);
 
         Collection<ContactDto> contactsFound = addressBookService.retrieveUniqieContactsFromAddressBooks(addressBookIDs).stream().
                 map(contact-> modelMapper.map(contact, ContactDto.class)).collect(Collectors.toList());
-        System.out.println("found contacts");
-        System.out.println(contactsFound);
+
+        log.info("found contacts");
+        log.info(contactsFound);
 
         return contactsFound;
     }
@@ -93,24 +93,27 @@ public class AddressBookController {
     /**
      * Adds the contact into the address book.
      *
-     * @param contactDto - the contact to be added in the phone book.
+     * @param contactDto - the contact to be added in the address book.
      * @return a <code>Contact</code>, that has been added to the address book
-     * @throws 404 status if no address is found with the specified ID
+     * @throws  ResponseStatusException Bad request status if no address is found with the specified ID
+     * or contact does not have given, surname or phone number.
+     *
      */
     @ApiOperation("Add a contact to an Address book.")
     @PostMapping(value = "{addressBookID}/addContact", consumes="application/json", produces="application/json")
     @ResponseStatus(HttpStatus.CREATED)
+    @SuppressWarnings("unused")
     public ContactDto addContactToAddressBook (
             @PathVariable("addressBookID")String addressBookID,
-            @ApiParam(value="The contact to be added in the phone book") @RequestBody ContactDto contactDto)
+            @ApiParam(value="The contact to be added in the address book. Id field Ignored by server") @RequestBody ContactDto contactDto)
             throws IllegalArgumentException{
-        log.info("this is the request body: " + contactDto);
+        log.debug("this is the request body: " + contactDto);
         Contact contact =  modelMapper.map(contactDto, Contact.class);
 
         Contact savedContact;
         try{
             savedContact = addressBookService.addContactToAddressBook(Long.valueOf(addressBookID), contact);
-        }catch (IllegalArgumentException e){
+        }catch (IllegalArgumentException | NullPointerException e){
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
 
@@ -123,12 +126,13 @@ public class AddressBookController {
      *
      * @param addressBookID - the id of the address book where the contact to be deleted resides.
      * @param contactId - the id of the contact to be deleted.
-     * @throws 404 status if no address is found with the specified addressBookID
-     * @throws 404 status if no contact is found with the specified contactID
+     * @throws ResponseStatusException Bad request status if no address is found with the specified addressBookID
+     * @throws ResponseStatusException Bad request  status if no contact is found with the specified contactID
      */
     @ApiOperation("Delete a contact from an address book.")
     @DeleteMapping(value="{addressBookID}/removeContact/{contactId}")
     @ResponseStatus(HttpStatus.OK)
+    @SuppressWarnings("unused")
     public void deleteContact(@ApiParam(value="The id of the address book") @PathVariable String addressBookID,
                               @ApiParam(value="The id of the contact to be deleted") @PathVariable String contactId)
                                 {

@@ -4,31 +4,27 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 public class ContactTest {
     private Contact contact;
     private AddressBook addressBook;
-    static public final String GIVEN_NAME = "Naruto";
-    static public final String SURNAME = "Uzomaki";
-    static public final String PHONE_NUMBER = "23423400909";
+    static private final String GIVEN_NAME = "Naruto";
+    static private final String SURNAME = "Uzomaki";
+    static private final String PHONE_NUMBER = "23423400909";
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         contact = new Contact(GIVEN_NAME,SURNAME,PHONE_NUMBER);
         addressBook = new AddressBook("Anime Address Book");
         contact.setAddressbook(addressBook);
     }
 
-
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         contact = null;
     }
-
 
     @Test
     public void getGiven() {

@@ -20,11 +20,6 @@ public class SwaggerConfig extends WebMvcConfigurationSupport {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()                 .apis(RequestHandlerSelectors.basePackage("com.reece.addressbookmanagement.controller"))
                 .paths(regex("/api.*"))
-//                .paths(x->{
-//                    boolean bool =  x.matches("/api.*|/account.*|/files.*");
-//                    log.info("path being passed in :  " + x + " is ok? " + bool);
-//                    return bool;
-//                })
                 .build();
 
     }

@@ -1,13 +1,10 @@
 package com.reece.addressbookmanagement.model;
 
-import org.springframework.beans.support.MutableSortDefinition;
-import org.springframework.beans.support.PropertyComparator;
-
 import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class AddressBook implements IAddressBook {
+public class AddressBook  {
     @Id
     @GeneratedValue
     private Long id;
@@ -20,13 +17,10 @@ public class AddressBook implements IAddressBook {
 
     public AddressBook(String name){this.name = name;}
 
-    @Override
     public String getName() { return name; }
 
-    @Override
     public void setName(String name) { this.name = name; }
 
-    @Override
     public List<Contact> getContacts() {
         if(contacts == null){
             contacts = new ArrayList<>();
@@ -34,7 +28,8 @@ public class AddressBook implements IAddressBook {
         return contacts;
     }
 
-    @Override
+    public Long getId(){return id;}
+
     public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
     }
